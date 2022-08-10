@@ -1,8 +1,11 @@
 from __future__ import division
-import CLIFF
-import MORPH
-import LeaF
-import toolkit
+from __future__ import absolute_import
+from builtins import map
+from builtins import zip
+from builtins import range
+from . import CLIFF
+from . import MORPH
+from . import LeaF
 import random
 import copy
 
@@ -55,20 +58,21 @@ def add_to_bin(attribute_names,
 
     # prepare for the core independent+dependent dataset
     for attr in independent_attrs:
-        col = zip(*try2add_data_matrix)[attribute_names.index(attr)]
-        col = map(toolkit.str2num, col)
+        col = list(zip(*try2add_data_matrix))[attribute_names.index(attr)]
+        col = list(map(toolkit.str2num, col))
+        my.append(col)
         my.append(col)
 
         if len(passing_bin)>2:
-            other_col = zip(*passing_bin[1:])[attribute_names.index(attr)]
-            other_col = map(toolkit.str2num, other_col)
+            other_col = list(zip(*passing_bin[1:]))[attribute_names.index(attr)]
+            other_col = list(map(toolkit.str2num, other_col))
             others.append(other_col)
 
-    classes = zip(*try2add_data_matrix)[attribute_names.index(objective_attr)]
+    classes = list(zip(*try2add_data_matrix))[attribute_names.index(objective_attr)]
     obj = classes[:]
-    other_classes = zip(*passing_bin[1:])[attribute_names.index(objective_attr)] if len(passing_bin) > 2 else []
-    classes = map(toolkit.str2num, classes)
-    other_classes = map(toolkit.str2num, other_classes)
+    other_classes = list(zip(*passing_bin[1:]))[attribute_names.index(objective_attr)] if len(passing_bin) > 2 else []
+    classes = list(map(toolkit.str2num, classes))
+    other_classes = list(map(toolkit.str2num, other_classes))
 
     if objective_as_binary:
         classes = [1 if i > 0 else 0 for i in classes]
@@ -79,14 +83,13 @@ def add_to_bin(attribute_names,
 
     my.append(classes)
     others.append(other_classes)
-    my = map(list, zip(*my))
-
+    my = list(map(list, list(zip(*my))))
     protected_line = copy.deepcopy(my[0])  # saving the data formats!
-    others = map(list, zip(*others))
+    others = list(map(list, list(zip(*others))))
 
     # normalization process
     norm_funcs, denorm_funcs = list(), list()
-    for col in map(list, zip(*my+others)):
+    for col in map(list, list(zip(*my+others))):
         f1, f2 = toolkit.attr_norm(col)
         norm_funcs.append(f1)
         denorm_funcs.append(f2)
@@ -94,29 +97,29 @@ def add_to_bin(attribute_names,
 
     # normalizing my
     uni_my = list()
-    my = map(list, zip(*my))
+    my = list(map(list, list(zip(*my))))
     for funi, col in enumerate(my[:-1]):
-        uni_my.append(map(norm_funcs[funi], col))
+        uni_my.append(list(map(norm_funcs[funi], col)))
     uni_my.append(my[-1])
-    my = map(list, zip(*uni_my))
+    my = list(map(list, list(zip(*uni_my))))
 
     if len(passing_bin) < 2:
         cache = CLIFF.cliff_core(my, cliff_percentage, objective_as_binary, handled_obj=True)
     else:
         # normalizing others
         uni_others = list()
-        others = map(list, zip(*others))
+        others = list(map(list, list(zip(*others))))
         for funi, col in enumerate(others[:-1]):
-            uni_others.append(map(norm_funcs[funi], col))
+            uni_others.append(list(map(norm_funcs[funi], col)))
         uni_others.append(others[-1])
-        others = map(list, zip(*uni_others))
+        others = list(map(list, list(zip(*uni_others))))
 
         to_submits = CLIFF.cliff_core(my, cliff_percentage, objective_as_binary, handled_obj=True)
         bins = others
 
         fetch_num = min(len(my) + len(others), 100)
         sampled = random.sample(my + others, fetch_num)
-        sampled_obj = zip(*sampled)[-1]
+        sampled_obj = list(zip(*sampled))[-1]
         sampled = toolkit.normalize_cols_for_table([row[:-1] for row in sampled])
         sampled = [i + [j] for i, j in zip(sampled, sampled_obj)]
 
@@ -152,7 +155,7 @@ def add_to_bin(attribute_names,
                 continue
             else:
                 row.append(h[h_c])
-        row = map(str, row)
+        row = list(map(str, row))
         passing_bin.append(row)
     return passing_bin
 
@@ -174,9 +177,9 @@ def lace2_simulator(attribute_names,
     data = copy.deepcopy(data_matrix)  # protect the original parameters
     n = len(data)
 
-    part_size = [random.uniform(0, 1) for _ in xrange(number_of_holder)]
+    part_size = [random.uniform(0, 1) for _ in range(number_of_holder)]
     s = sum(part_size)
-    part_size = sorted(map(lambda x: int(n/s*x), part_size))
+    part_size = sorted([int(n/s*x) for x in part_size])
     # correction
     corr = n - sum(part_size)
     if corr > 0:

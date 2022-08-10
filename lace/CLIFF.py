@@ -22,10 +22,19 @@
 #  THE SOFTWARE.
 
 from __future__ import division
+from __future__ import absolute_import
+from __future__ import unicode_literals
+from builtins import map
+from builtins import zip
+from builtins import range
 import copy
 import logging
 import random
-import toolkit
+from . import toolkit
+from six.moves import map
+from six.moves import range
+from six.moves import zip
+
 
 __author__ = "Jianfeng Chen"
 __copyright__ = "Copyright (C) 2016 Jianfeng Chen"
@@ -33,20 +42,9 @@ __license__ = "MIT"
 __version__ = "2.0"
 __email__ = "jchen37@ncsu.edu"
 
-"""
-cliff algorithm
-Reference: Peters, Fayola, et al. "Balancing privacy and utility in cross-company defect prediction."
-Software Engineering, IEEE Transactions on 39.8 (2013): 1054-1068.
-"""
-
 
 def power(L, C, Erange):
-    """
-    :param L: a list of values for one attribute in the data set
-    :param C: the class corresponded to L list
-    :param Erange: a st of sub-range for a given attribute. specifically, it's the boundary returned from binrange()
-    :return: the power of each item in this attribute
-    """
+   
     assert len(L) == len(C), "The L and C must be corresponded to each other"
     E = copy.deepcopy(Erange)
     E[0] -= 1
@@ -79,18 +77,15 @@ def power(L, C, Erange):
 
 
 def cliff_core(data, percentage, obj_as_binary, handled_obj=False):
-    """
-    data has no header, only containing the record attributes
-    :return the cliffed data INDICES(part of the input data)
-    """
 
     if len(data) < 50:
         logging.debug("no enough data to cliff. return the whole dataset")
-        return range(len(data))
+        return list(range(len(data)))
+
 
     # percentage /= 100 if percentage > 1 else 1
 
-    classes = map(toolkit.str2num, zip(*data)[-1])
+    classes = list(map(toolkit.str2num, list(zip(*data))[-1]))
 
     if not handled_obj:
         if obj_as_binary:
@@ -101,19 +96,19 @@ def cliff_core(data, percentage, obj_as_binary, handled_obj=False):
     data_power = list()  # will be 2D list (list of list)
 
     for col in zip(*data):
-        col = map(toolkit.str2num, col)
+        col = list(map(toolkit.str2num, col))
         E = toolkit.binrange(col)
         data_power.append(power(col, classes, E))
 
-    data_power = map(list, zip(*data_power))  # transposing the data power
+    data_power = list(map(list, list(zip(*data_power))))  # transposing the data power
     row_sum = [sum(row) for row in data_power]
 
-    index = range(len(data))
-    zips = zip(data, classes, row_sum, index)
+    index = list(range(len(data)))
+    zips = list(zip(data, classes, row_sum, index))
 
     output = list()
     for cls in set(classes):
-        matched = filter(lambda z: z[1] == cls, zips)
+        matched = [z for z in zips if z[1] == cls]
         random.shuffle(matched)
         matched = sorted(matched, key=lambda z: z[2], reverse=True)
 
@@ -132,31 +127,18 @@ def cliff(attribute_names,
           objective_attr,
           objective_as_binary=False,
           cliff_percentage=0.4):
-    """
-    Core function for cliff algorithm
-    prune the data set according to the power
-    attributes are discrete
-
-    :param attribute_names: The attribute names. This should match the data_matrix
-    :param data_matrix: the data to trim
-    :param independent_attrs: set up the independent attributes in the dataset. Note: 'name', 'id', etc. might not be
-        considered as independent attributes
-    :param objective_attr: marking which attribute is the objective to be considered
-    :param objective_as_binary: signal to set up whether treat the objective as a binary attribute. Default: False
-    :param cliff_percentage: set up how many records to be remained. By default, it is 0.4
-    :return: The survived (valued) records
-    """
+ 
     ori_attrs, alldata = attribute_names, data_matrix  # load the database
 
-    alldata_t = map(list, zip(*alldata))
+    alldata_t = list(map(list, list(zip(*alldata))))
     valued_data_t = list()
     for attr, col in zip(ori_attrs, alldata_t):
         if attr in independent_attrs:
             valued_data_t.append(col)
     valued_data_t.append(alldata_t[attribute_names.index(objective_attr)])  # cant miss the classification
 
-    alldata = map(list, zip(*valued_data_t))
-    alldata = map(lambda row: map(toolkit.str2num, row), alldata)  # numbering the 2d table
+    alldata = list(map(list, list(zip(*valued_data_t))))
+    alldata = [list(map(toolkit.str2num, row)) for row in alldata]  # numbering the 2d table
 
     after_cliff = cliff_core(alldata, cliff_percentage, objective_as_binary)
 

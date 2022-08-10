@@ -1,7 +1,11 @@
 from __future__ import division
+from __future__ import absolute_import
+from builtins import map
+from builtins import zip
+from builtins import range
 import random
 import math
-import toolkit
+from . import toolkit
 
 __author__ = "Jianfeng Chen"
 __copyright__ = "Copyright (C) 2016 Jianfeng Chen"
@@ -25,7 +29,8 @@ def simplify_morph(data, alpha, beta):
     1) data is handled, no header, class at last column
     2) data has been normalized
     """
-    classes = map(list, zip(*data))[-1]
+
+    classes = list(map(list, list(zip(*data))))[-1]
 
     if len(set((classes))) == 1:
         return data
@@ -61,7 +66,7 @@ def morph(attribute_names,
     :return:
     """
 
-    dataset_t = map(list, zip(*data_matrix))
+    dataset_t = list(map(list, list(zip(*data_matrix))))
     dataset = list()
     classes = list()
     for d, a in zip(dataset_t, attribute_names):
@@ -70,9 +75,9 @@ def morph(attribute_names,
         if a == objective_attr:
             classes = list(d)
 
-    dataset = map(list, zip(*dataset))
-    dataset = [map(toolkit.str2num, row) for row in dataset]  # str to numeric
-    classes = map(toolkit.str2num, classes)
+    dataset = list(map(list, list(zip(*dataset))))
+    dataset = [list(map(toolkit.str2num, row)) for row in dataset]  # str to numeric
+    classes = list(map(toolkit.str2num, classes))
 
     if objective_as_binary:
         classes = [1 if i > 0 else 0 for i in classes]
@@ -88,7 +93,7 @@ def morph(attribute_names,
         dataset.append([1]*len(dataset[0]))
 
     '''dataset transposed mode begins...'''
-    dataset = map(list, zip(*dataset))  # transpose.
+    dataset = list(map(list, list(zip(*dataset))))  # transpose.
     norm_funcs = []
     denorm_funcs = []
 
@@ -98,11 +103,10 @@ def morph(attribute_names,
         f1, f2 = toolkit.attr_norm(attr_elements)
         norm_funcs.append(f1)
         denorm_funcs.append(f2)
-        dataset[attr_index] = map(f1, attr_elements)
+        dataset[attr_index] = list(map(f1, attr_elements))
 
     '''dataset mode recover...'''
-    dataset = map(list, zip(*dataset))  # transpose again.
-
+    dataset = list(map(list, list(zip(*dataset))))  # transpose again.
     for row_index, row in enumerate(dataset):  # for each row
         heterogeneous_index = [i for i in range(len(classes)) if classes[i] != classes[row_index]]
         boundary_dist = min([toolkit.euclidean_dist(row, dataset[heg]) for heg in heterogeneous_index])
@@ -111,15 +115,15 @@ def morph(attribute_names,
             dataset[row_index][i] += boundary_dist*random.uniform(alpha, beta)*random.choice([1, -1])  # shake
 
     '''dataset transposed mode begins...'''
-    dataset = map(list, zip(*dataset))  # transpose.
+    dataset = list(map(list, list(zip(*dataset))))  # transpose.
     for attr_index, attr_elements in enumerate(dataset):  # for each attribute elements
-        dataset[attr_index] = map(denorm_funcs[attr_index], attr_elements)  # scale to the original
+        dataset[attr_index] = list(map(denorm_funcs[attr_index], attr_elements))  # scale to the original
         for i in range(len(dataset[attr_index])):
             if is_int[attr_index]:
                 dataset[attr_index][i] = int(round(dataset[attr_index][i]))  # rounding when needed
             else:
                 dataset[attr_index][i] = round(dataset[attr_index][i], 4)
-    morphed = map(list, zip(*dataset))  # recover to the original mode and finish.
+    morphed = list(map(list, list(zip(*dataset))))  # recover to the original mode and finish.
 
     '''!!morph done!!'''
     if data_has_normalized:

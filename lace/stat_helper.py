@@ -1,8 +1,11 @@
-class Rx:
+from __future__ import division
+from builtins import object
+from past.utils import old_div
+class Rx(object):
   "has the nums of a treatment, its name and rank"
   def __init__(i,lst):
      i.rx, i.lst = lst[0], lst[1:]
-     i.mean = sum(i.lst)/len(i.lst)
+     i.mean = old_div(sum(i.lst),len(i.lst))
      i.rank = 0
   def __repr__(i):
     return 'rank #%s %s at %s'%(i.rank,i.rx,i.mean)
@@ -27,7 +30,7 @@ def a12(lst1,lst2,rev=True):
       if   x==y : same += 1
       elif rev     and x > y: more += 1
       elif not rev and x < y : more += 1
-  return (more + 0.5*same)  / (len(lst1)*len(lst2))
+  return old_div((more + 0.5*same), (len(lst1)*len(lst2)))
 
 def fromFile(f="a12.dat",rev=True,enough=0.66):
   "utility for reading sample data from disk"
@@ -43,4 +46,4 @@ def fromFile(f="a12.dat",rev=True,enough=0.66):
         else:
           now  = word
           cache[now] = [now]
-  return a12s(cache.values(),rev,enough)
+  return a12s(list(cache.values()),rev,enough)

@@ -1,7 +1,14 @@
 from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import str
+from builtins import next
+from builtins import map
+from builtins import zip
+from builtins import range
 from bisect import bisect_left
-from stat_helper import a12s as a12rank
-import bins
+from .stat_helper import a12s as a12rank
+from . import bins
 import csv
 
 __author__ = "Jianfeng Chen"
@@ -125,8 +132,8 @@ def normalize_cols_for_table(table):
     result = []
     for col in zip(*table):
         f1, f2 = attr_norm(list(col))
-        result.append(map(f1, col))
-    return map(list, zip(*result))
+        result.append(list(map(f1, col)))
+    return list(map(list, list(zip(*result))))
 
 
 def del_col_in_table(list_of_list, col_index):
@@ -143,12 +150,12 @@ def del_col_in_table(list_of_list, col_index):
         if col_index[i] < 0:
             col_index[i] += len(list_of_list[0])
 
-    list_of_list = map(list, zip(*list_of_list))
+    list_of_list = list(map(list, list(zip(*list_of_list))))
     return_table = []
     for index, col in enumerate(list_of_list):
         if index not in col_index:
             return_table.append(col)
-    return map(list, zip(*return_table))
+    return list(map(list, list(zip(*return_table))))
 
 
 def load_csv(folder, file_name, has_header=True):

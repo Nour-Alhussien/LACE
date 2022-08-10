@@ -1,4 +1,7 @@
 from __future__ import division
+from __future__ import print_function
+from builtins import str
+from builtins import object
 from copy import deepcopy
 from collections import namedtuple
 
@@ -83,7 +86,7 @@ ranges = []
 
 def bins1(i, nums, all, lvl):
     if i.verbose:
-        print("|.."*lvl, str(nums))
+        print(("|.."*lvl, str(nums)))
 
     cut = -1
     n = len(nums)

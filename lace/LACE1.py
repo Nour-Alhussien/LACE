@@ -1,5 +1,6 @@
-from CLIFF import *
-from MORPH import *
+from __future__ import absolute_import
+from .CLIFF import *
+from .MORPH import *
 
 __author__ = "Jianfeng Chen"
 __copyright__ = "Copyright (C) 2016 Jianfeng Chen"
